@@ -287,7 +287,7 @@ int main(void)
 
   //Initialize HC06
   HC06_Init_Device(&HC06_Dev, &huart1, BLE_Power_GPIO_Port, BLE_Power_Pin);
-  HC06_ConfigBaudRate(&HC06_Dev, BR_115200);
+  //HC06_ConfigBaudRate(&HC06_Dev, BR_115200);
   /* USER CODE END 2 */
 
   /* Infinite loop */
