@@ -467,29 +467,25 @@ Wire Bus Line
 Text Label 2700 6150 0    50   ~ 0
 UART1
 Entry Wire Line
-	4150 3850 4250 3950
+	3900 3850 4000 3950
 Entry Wire Line
-	4150 3950 4250 4050
+	3900 3950 4000 4050
 Entry Wire Line
-	4150 4050 4250 4150
+	3900 4050 4000 4150
 Entry Wire Line
-	4150 3750 4250 3850
+	3900 3750 4000 3850
 Wire Wire Line
-	4350 2850 4350 3850
+	4150 2850 4150 3850
 Wire Wire Line
-	4350 3850 4250 3850
-Wire Wire Line
-	4250 4150 4350 4150
-Wire Wire Line
-	4350 4150 4350 5100
+	4150 4150 4150 5100
 Wire Wire Line
 	7850 5100 7850 4450
 Wire Wire Line
 	7850 4450 6850 4450
 Wire Bus Line
-	4150 3900 3900 3900
-Connection ~ 4150 3900
-Text Label 3900 3900 2    50   ~ 0
+	3900 3900 3650 3900
+Connection ~ 3900 3900
+Text Label 3650 3900 2    50   ~ 0
 SPI3
 Wire Wire Line
 	1900 4250 1800 4250
@@ -589,12 +585,6 @@ F 3 "~" H 1100 1200 50  0001 C CNN
 	1    1100 1200
 	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	5650 4150 5500 4150
-Wire Wire Line
-	5500 4150 5500 4250
-Wire Wire Line
-	5500 4250 5650 4250
 $Comp
 L Device:D_Zener D1
 U 1 1 60A0452B
@@ -642,12 +632,9 @@ Connection ~ 1450 1700
 Wire Wire Line
 	1450 1700 1450 1750
 Text GLabel 1800 1700 2    50   Input ~ 0
-PWM_IN
-Text GLabel 5300 4250 0    50   Input ~ 0
-PWM_IN
-Wire Wire Line
-	5300 4250 5500 4250
-Connection ~ 5500 4250
+RC_PWM
+Text GLabel 5450 4150 0    50   Input ~ 0
+RC_PWM
 $Comp
 L Device:Buzzer BZ1
 U 1 1 60A04BB9
@@ -836,22 +823,28 @@ Wire Wire Line
 	4200 1950 4200 2050
 Wire Wire Line
 	3800 1750 3900 1750
-Text GLabel 4950 2950 0    50   Output ~ 0
-Buzzer_PWR
-Wire Wire Line
-	4350 2850 5650 2850
-Wire Wire Line
-	4250 3950 5650 3950
-Wire Wire Line
-	4250 4050 5650 4050
-Wire Wire Line
-	4350 5100 7850 5100
 Wire Wire Line
 	5650 2950 4950 2950
 Text GLabel 3400 1750 0    50   Input ~ 0
-Buzzer_PWR
+Buzzer_PWR_CTRL
 Wire Wire Line
 	3400 1750 3500 1750
+Text GLabel 4950 2950 0    50   Input ~ 0
+Buzzer_PWR_CTRL
+Wire Wire Line
+	4000 3850 4150 3850
+Wire Wire Line
+	4000 3950 5650 3950
+Wire Wire Line
+	4000 4050 5650 4050
+Wire Wire Line
+	4000 4150 4150 4150
+Wire Wire Line
+	4150 2850 5650 2850
+Wire Wire Line
+	4150 5100 7850 5100
+Wire Wire Line
+	5650 4150 5450 4150
 Wire Bus Line
 	6350 2200 6550 2200
 Wire Bus Line
@@ -867,9 +860,9 @@ Wire Bus Line
 Wire Bus Line
 	8700 5400 8700 5550
 Wire Bus Line
-	4150 3750 4150 3900
+	3900 3750 3900 3900
 Wire Bus Line
-	4150 3900 4150 4050
+	3900 3900 3900 4050
 Wire Bus Line
 	1100 3650 1100 3800
 Wire Bus Line
