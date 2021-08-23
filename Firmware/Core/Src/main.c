@@ -226,27 +226,27 @@ int main(void)
   RCReceiverS.PWM_DC_Thre = 0.7;
 
   //Initialize CS lines for SPI communications
-  HAL_GPIO_WritePin(FLASH_SPI1_CS_GPIO_Port, FLASH_SPI1_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(W25Q64_SPI1_CS_GPIO_Port, W25Q64_SPI1_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(MS5611_SPI2_CS_GPIO_Port, MS5611_SPI2_CS_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(IMU_SPI3_CS_GPIO_Port, IMU_SPI3_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(ICM20948_SPI3_CS_GPIO_Port, ICM20948_SPI3_CS_Pin, GPIO_PIN_SET);
 
   //Initialize user indicators
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET); //turn off led
-  BUZZER_Init(&BUZZER_Dev, Buzzer_GPIO_Port, Buzzer_Pin, &htim3);
+  BUZZER_Init(&BUZZER_Dev, Buzzer_PWR_CTRL_GPIO_Port, Buzzer_PWR_CTRL_Pin, &htim3);
 
   //Initialize MS5611
   MS5611_Init_Device(&MS5611_Dev, &hspi2, MS5611_SPI2_CS_GPIO_Port, MS5611_SPI2_CS_Pin);
   MS5611_Set_Config(&MS5611_Dev, OSR_4096, OSR_4096);
 
   //Initialize ICM20948
-  ICM20948_Init_Device(&ICM20948_Dev, &hspi3, IMU_SPI3_CS_GPIO_Port ,IMU_SPI3_CS_Pin);
+  ICM20948_Init_Device(&ICM20948_Dev, &hspi3, ICM20948_SPI3_CS_GPIO_Port ,ICM20948_SPI3_CS_Pin);
   ICM20948_Set_Sensors_Default_Config(&ICM20948_Dev);
 
   //Initialize UBLOXM8N
   UBLOXM8N_Init_Device(&UBLOXM8N_Dev, &huart2);
 
   //Initialize W25Q64V
-  W25qxx_Init_Device(&W25Q64V_Dev, &hspi1, FLASH_SPI1_CS_GPIO_Port, FLASH_SPI1_CS_Pin);
+  W25qxx_Init_Device(&W25Q64V_Dev, &hspi1, W25Q64_SPI1_CS_GPIO_Port, W25Q64_SPI1_CS_Pin);
 //  uint32_t i;
 //  for (i=0; i<26; i++)
 //  {
@@ -286,7 +286,7 @@ int main(void)
 //  }
 
   //Initialize HC06
-  HC06_Init_Device(&HC06_Dev, &huart1, BLE_Power_GPIO_Port, BLE_Power_Pin);
+  HC06_Init_Device(&HC06_Dev, &huart1, HC06_PWR_CTRL_GPIO_Port, HC06_PWR_CTRL_Pin);
   //HC06_ConfigBaudRate(&HC06_Dev, BR_115200);
   /* USER CODE END 2 */
 
@@ -912,16 +912,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LED_Pin|IMU_SPI3_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_Pin|ICM20948_SPI3_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, FLASH_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Test_Pin|BLE_Power_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Test_Pin|HC06_PWR_CTRL_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_Pin IMU_SPI3_CS_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|IMU_SPI3_CS_Pin;
+  /*Configure GPIO pins : LED_Pin ICM20948_SPI3_CS_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|ICM20948_SPI3_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -933,15 +933,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(UserButton_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : FLASH_SPI1_CS_Pin MS5611_SPI2_CS_Pin Buzzer_Pin */
-  GPIO_InitStruct.Pin = FLASH_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_Pin;
+  /*Configure GPIO pins : W25Q64_SPI1_CS_Pin MS5611_SPI2_CS_Pin Buzzer_PWR_CTRL_Pin */
+  GPIO_InitStruct.Pin = W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Test_Pin BLE_Power_Pin */
-  GPIO_InitStruct.Pin = Test_Pin|BLE_Power_Pin;
+  /*Configure GPIO pins : Test_Pin HC06_PWR_CTRL_Pin */
+  GPIO_InitStruct.Pin = Test_Pin|HC06_PWR_CTRL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
