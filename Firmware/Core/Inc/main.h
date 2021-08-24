@@ -62,9 +62,6 @@ void UART_IdleLineCallback(UART_HandleTypeDef *huart);
 #define LED_GPIO_Port GPIOC
 #define ICM20948_SPI3_CS_Pin GPIO_PIN_15
 #define ICM20948_SPI3_CS_GPIO_Port GPIOC
-#define UserButton_Pin GPIO_PIN_0
-#define UserButton_GPIO_Port GPIOA
-#define UserButton_EXTI_IRQn EXTI0_IRQn
 #define UBLOX_USART2_TX_Pin GPIO_PIN_2
 #define UBLOX_USART2_TX_GPIO_Port GPIOA
 #define UBLOX_USART2_RX_Pin GPIO_PIN_3

@@ -63,12 +63,6 @@ typedef enum _Event_FSM
 	UserButtonLongPress_Event, //only for debugging
 	UserButtonVeryLongPress_Event, //only for debugging
 } Event_FSM;
-typedef enum _UserButton_State_FSM
-{
-	Idle,
-	Wait1,
-	Wait2,
-} UserButton_State_FSM;
 typedef enum _SwitchPosition //switch position RC transceiver
 {
 	Minus100,
@@ -108,7 +102,6 @@ SPI_HandleTypeDef hspi3;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim9;
-TIM_HandleTypeDef htim10;
 TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart1;
@@ -132,7 +125,6 @@ BUZZER_DEVICE BUZZER_Dev;
 State_FSM state_FSM; //stores current FSM state
 Event_FSM event_FSM; //stores new FSM event
 fifo_t queue_FSM; //stores FSm events
-UserButton_State_FSM buttonState_FSM;
 
 //Other global variables
 uint8_t dataBuffer[132]; //Data buffer (holds all sensor data from 1 sampling period: 132 bytes)
@@ -157,7 +149,6 @@ static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_TIM10_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_TIM11_Init(void);
 static void MX_TIM4_Init(void);
@@ -208,7 +199,6 @@ int main(void)
   MX_SPI2_Init();
   MX_SPI3_Init();
   MX_USART2_UART_Init();
-  MX_TIM10_Init();
   MX_TIM9_Init();
   MX_TIM11_Init();
   MX_TIM4_Init();
@@ -218,7 +208,6 @@ int main(void)
   //Initialize FSMs & other global variables
   state_FSM = Initialize_State;
   queue_FSM = fifo_create(10, sizeof(Event_FSM));
-  buttonState_FSM = Idle;
 
   RCReceiverS.PWM_DC_Minus100 = 12.93;
   RCReceiverS.PWM_DC_Plus100 = 7.33;
@@ -247,47 +236,11 @@ int main(void)
 
   //Initialize W25Q64V
   W25qxx_Init_Device(&W25Q64V_Dev, &hspi1, W25Q64_SPI1_CS_GPIO_Port, W25Q64_SPI1_CS_Pin);
-//  uint32_t i;
-//  for (i=0; i<26; i++)
-//  {
-//	  W25qxx_WriteByte(&W25Q64V_Dev, 0x05, i*4096);
-//  }
-//  W25qxx_IsErased(&W25Q64V_Dev);
-//  W25qxx_EraseWrittenMemory(&W25Q64V_Dev);
-//  W25qxx_IsErased(&W25Q64V_Dev);
-//  W25qxx_EraseSector(&W25Q64V_Dev, 0);
-//  uint8_t bufferWrite[224] = {0};
-//  uint8_t bufferRead[3][256]; //stores data from 3 pages
-//  uint8_t cnt1;
-//  uint8_t cnt2;
-//
-//  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; //enable trace
-//
-//  for (cnt1 = 0; cnt1<3; cnt1++)
-//  {
-//	  for (cnt2 = 0; cnt2<224; cnt2++)
-//	  {
-//		  bufferWrite[cnt2] = cnt1+1;
-//	  }
-//
-//		DWT->CYCCNT = 0; //clear DWT cycle counter
-//		DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-//
-//		cycles1 = DWT->CYCCNT;
-//
-//		W25Q64_WriteBytes(&W25Q64V_Dev, &bufferWrite[0],224);
-//
-//		cycles2 = DWT->CYCCNT;
-//		cyclesDiff = cycles2-cycles1;
-//  }
-//  for (cnt1 = 0; cnt1<3; cnt1++)
-//  {
-//	  W25qxx_ReadPage(&W25Q64V_Dev, &bufferRead[cnt1][0],cnt1,0,0);
-//  }
 
   //Initialize HC06
   HC06_Init_Device(&HC06_Dev, &huart1, HC06_PWR_CTRL_GPIO_Port, HC06_PWR_CTRL_Pin);
   //HC06_ConfigBaudRate(&HC06_Dev, BR_115200);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -769,37 +722,6 @@ static void MX_TIM9_Init(void)
 }
 
 /**
-  * @brief TIM10 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM10_Init(void)
-{
-
-  /* USER CODE BEGIN TIM10_Init 0 */
-
-  /* USER CODE END TIM10_Init 0 */
-
-  /* USER CODE BEGIN TIM10_Init 1 */
-
-  /* USER CODE END TIM10_Init 1 */
-  htim10.Instance = TIM10;
-  htim10.Init.Prescaler = 20;
-  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 65535;
-  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM10_Init 2 */
-  __HAL_TIM_URS_ENABLE(&htim10); //URS bit set to avoid an interrupt when making an update generation
-  /* USER CODE END TIM10_Init 2 */
-
-}
-
-/**
   * @brief TIM11 Initialization Function
   * @param None
   * @retval None
@@ -927,12 +849,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : UserButton_Pin */
-  GPIO_InitStruct.Pin = UserButton_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(UserButton_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : W25Q64_SPI1_CS_Pin MS5611_SPI2_CS_Pin Buzzer_PWR_CTRL_Pin */
   GPIO_InitStruct.Pin = W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -946,10 +862,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 4, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
 }
 
@@ -984,32 +896,6 @@ void setDeviceInfo(void)
 }
 
 //Interrupt callbacks
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	if(GPIO_Pin == UserButton_Pin)
-	{
-		HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-		switch (buttonState_FSM)
-		{
-			case Idle:
-				buttonState_FSM = Wait1;
-				__HAL_TIM_SET_COUNTER(&htim10,0);
-				__HAL_TIM_SET_PRESCALER(&htim10,20); //20ms time
-				TIM10->EGR |= TIM_EGR_UG; //update generation to load ps register changes
-				HAL_TIM_Base_Start_IT(&htim10);
-				break;
-			case Wait1:
-				break;
-			case Wait2:
-				HAL_TIM_Base_Stop_IT(&htim10);
-				buttonState_FSM = Idle;
-				Event_FSM eventTemp = UserButtonShortPress_Event;
-				fifo_add(queue_FSM, &eventTemp);
-				HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-				break;
-		}
-	}
-}
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim == &htim11) //acquisition trigger
@@ -1061,37 +947,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			BUZZER_ON(&BUZZER_Dev);
 			__HAL_TIM_SET_PRESCALER(&htim3,BUZZER_Dev.miliOFF);
-		}
-	}
-	if (htim == &htim10) //userButton timer press event detection
-	{
-		HAL_TIM_Base_Stop_IT(&htim10);
-		switch (buttonState_FSM)
-		{
-			case Idle:
-				break;
-			case Wait1:
-				if(HAL_GPIO_ReadPin(UserButton_GPIO_Port, UserButton_Pin) == GPIO_PIN_SET) //if userButton is released (=1)
-				{
-					buttonState_FSM = Idle;
-				}
-				else
-				{
-					buttonState_FSM = Wait2;
-					__HAL_TIM_SET_COUNTER(&htim10,0);
-					__HAL_TIM_SET_PRESCALER(&htim10,2074); //2s time
-					TIM10->EGR |= TIM_EGR_UG; //update generation to load ps register changes
-					HAL_TIM_Base_Start_IT(&htim10);
-				}
-				HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-				break;
-			case Wait2:
-				HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-				buttonState_FSM = Idle;
-				Event_FSM eventTemp = UserButtonLongPress_Event;
-				fifo_add(queue_FSM, &eventTemp);
-				HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-				break;
 		}
 	}
 }

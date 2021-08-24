@@ -135,5 +135,45 @@ void W25qxx_EraseWrittenMemory(W25Qxx_DEVICE *pdev);
  	  W25qxx_ReadPage(&bufferRead[cnt1][0],cnt1,0,0);
  }*/
 
+ //Other example
+
+ //  uint32_t i;
+ //  for (i=0; i<26; i++)
+ //  {
+ //	  W25qxx_WriteByte(&W25Q64V_Dev, 0x05, i*4096);
+ //  }
+ //  W25qxx_IsErased(&W25Q64V_Dev);
+ //  W25qxx_EraseWrittenMemory(&W25Q64V_Dev);
+ //  W25qxx_IsErased(&W25Q64V_Dev);
+ //  W25qxx_EraseSector(&W25Q64V_Dev, 0);
+ //  uint8_t bufferWrite[224] = {0};
+ //  uint8_t bufferRead[3][256]; //stores data from 3 pages
+ //  uint8_t cnt1;
+ //  uint8_t cnt2;
+ //
+ //  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; //enable trace
+ //
+ //  for (cnt1 = 0; cnt1<3; cnt1++)
+ //  {
+ //	  for (cnt2 = 0; cnt2<224; cnt2++)
+ //	  {
+ //		  bufferWrite[cnt2] = cnt1+1;
+ //	  }
+ //
+ //		DWT->CYCCNT = 0; //clear DWT cycle counter
+ //		DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+ //
+ //		cycles1 = DWT->CYCCNT;
+ //
+ //		W25Q64_WriteBytes(&W25Q64V_Dev, &bufferWrite[0],224);
+ //
+ //		cycles2 = DWT->CYCCNT;
+ //		cyclesDiff = cycles2-cycles1;
+ //  }
+ //  for (cnt1 = 0; cnt1<3; cnt1++)
+ //  {
+ //	  W25qxx_ReadPage(&W25Q64V_Dev, &bufferRead[cnt1][0],cnt1,0,0);
+ //  }
+
 #endif
 
