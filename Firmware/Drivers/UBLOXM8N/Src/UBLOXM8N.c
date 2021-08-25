@@ -34,7 +34,7 @@ void UBLOXM8N_Init_Device(UBLOXM8N_DEVICE *pdev, UART_HandleTypeDef *UART_HANDLE
 	uint8_t buffer_Tx4[11] = {0xB5, 0x62, 0x06, 0x01, 0x03, 0x00, 0x01, 0x07, 0x01, 0x13, 0x51};
 	HAL_UART_Transmit(pdev->serif.UART_HANDLE, &buffer_Tx4[0], 11, 1000);
 	//Enable idle line uart interrupt in the MCU
-	__HAL_UART_ENABLE_IT(pdev->serif.UART_HANDLE, UART_IT_IDLE);
+	//__HAL_UART_ENABLE_IT(pdev->serif.UART_HANDLE, UART_IT_IDLE);
 
 }
 uint8_t UBLOXM8N_checkSum(uint8_t buff[],uint8_t CKA, uint8_t CKB)

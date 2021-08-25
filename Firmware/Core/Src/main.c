@@ -257,7 +257,7 @@ int main(void)
 		  //BLE power on and enable idle line interrupt on its usart
 		  HC06_PowerON(&HC06_Dev);
 		  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
-		  //HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
+		  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 		  //Change FSM state
 		  state_FSM = NonCalibrated_State;
 		  break;
@@ -275,6 +275,8 @@ int main(void)
 			  BUZZER_nBeeps_Blck(&BUZZER_Dev, 3);
 			  //Perform calibration operations
 			  MS5611_Calibrate_Altitude(&MS5611_Dev, 5);
+			  //Enable GPS IT uart
+			  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 			  //Stop led blinking and turn it off
 			  HAL_TIM_Base_Stop_IT(&htim9);
 			  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
@@ -363,6 +365,8 @@ int main(void)
 			  BUZZER_Beep_Stop(&BUZZER_Dev);
 			  BUZZER_nBeeps_Blck(&BUZZER_Dev, 2);
 			  BUZZER_TurnON_Blck(&BUZZER_Dev, 500);
+			  //Disable GPS IT uart
+			  __HAL_UART_DISABLE_IT(&huart2, UART_IT_IDLE);
 			  //Turn on BLE
 			  HC06_PowerON(&HC06_Dev);
 			  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
