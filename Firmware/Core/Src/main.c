@@ -234,6 +234,9 @@ int main(void)
 
   //Initialize HC06
   HC06_Init_Device(&HC06_Dev, &huart1, HC06_PWR_CTRL_GPIO_Port, HC06_PWR_CTRL_Pin);
+
+  HC06_PowerON(&HC06_Dev);
+  //HAL_Delay(500);
   //HC06_ConfigBaudRate(&HC06_Dev, BR_115200);
 
   /* USER CODE END 2 */
@@ -256,7 +259,7 @@ int main(void)
 		  HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_2);
 		  //BLE power on and enable idle line interrupt on its usart
 		  HC06_PowerON(&HC06_Dev);
-		  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+		  //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 		  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 		  //Change FSM state
 		  state_FSM = NonCalibrated_State;
@@ -265,9 +268,9 @@ int main(void)
 		  switch (event_FSM)
 		  {
 		  case Minus100_to_Zero_Event: //User switch from A to B --> turn off bluetooth and start calibration
-			  //Turn off BLE
+			  //Turn off BLE and stop HAL_UART_IT receptions
 			  HC06_PowerOFF(&HC06_Dev);
-			  __HAL_UART_DISABLE_IT(&huart1, UART_IT_IDLE);
+			  HAL_UART_AbortReceive_IT(&huart1);
 			  //Start led blinking
 			  __HAL_TIM_SET_PRESCALER(&htim9,207); //200ms time
 			  HAL_TIM_Base_Start_IT(&htim9);
@@ -286,10 +289,10 @@ int main(void)
 			  state_FSM = Calibrated_State;
 			  break;
 		  case BLT_Set_UsrData_Event: //Set device information request from PC app
-
+			  //to be completed
+			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 			  break;
 		  case BLT_Get_UsrData_Event: //Get device information request from PC app
-			  HAL_UART_AbortReceive_IT(&huart1);
 			  HC06_Tx_UsrData[0] = W25Q64V_Dev.isErased; //1 = is erased
 			  memcpy(&HC06_Tx_UsrData[1],&W25Q64V_Dev.written4KSectorCount,2); //max 4kSectorCount = 2048 (only 2 bytes required)
 			  memcpy(&HC06_Tx_UsrData[3],&deviceName[0],50); //device name
@@ -297,8 +300,7 @@ int main(void)
 			  HAL_UART_Transmit(&huart1, HC06_Tx_UsrData, 57, 100);
 			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 			  break;
-		  case BLT_Get_SensorData_Event: //Get sensor data request from PC app
-			  HAL_UART_AbortReceive_IT(&huart1);
+		  case BLT_Get_SensorData_Event:; //Get sensor data request from PC app
 			  uint32_t i = 0;
 			  //uint32_t j = 0;
 			  for (i=0; i<W25Q64V_Dev.written4KSectorCount; i++)
@@ -326,8 +328,9 @@ int main(void)
 			  {
 				  deviceName[n] = ' ';
 			  }
-			  break;
 			  setDeviceInfo();
+			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
+			  break;
 		  default:
 			  break;
 		  }
@@ -369,7 +372,7 @@ int main(void)
 			  __HAL_UART_DISABLE_IT(&huart2, UART_IT_IDLE);
 			  //Turn on BLE
 			  HC06_PowerON(&HC06_Dev);
-			  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+			  //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 			  //Change FSM state
 			  state_FSM = NonCalibrated_State;
@@ -764,7 +767,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 921600;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -879,6 +882,10 @@ void getDeviceInfo(void)
 	uint8_t nSamplesU8[4];
 	W25qxx_ReadBytes(&W25Q64V_Dev, &nSamplesU8[0], 0x7FF032, 4);
 	nSamples = (nSamplesU8[0] | nSamplesU8[1]<<8 | nSamplesU8[2]<<16 | nSamplesU8[3]<<24);
+	if (nSamples == 0xFFFFFFFF)
+	{
+		nSamples = 0;
+	}
 }
 void setDeviceInfo(void)
 {
@@ -952,10 +959,10 @@ void UART_IdleLineCallback(UART_HandleTypeDef *huart)
 	{
 		HAL_UART_Receive_IT(&huart2, &(UBLOXM8N_Dev.pvtMsg[0]), 100); //se reciben bloques de 10 bits
 	}
-	if (huart == &huart1) //Bluetooth uart idle line detection
-	{
-		HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6); //se reciben bloques de 6 bits
-	}
+//	if (huart == &huart1) //Bluetooth uart idle line detection
+//	{
+//		HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6); //se reciben bloques de 6 bits
+//	}
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
