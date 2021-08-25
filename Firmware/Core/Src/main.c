@@ -43,8 +43,6 @@ typedef enum _State_FSM
 	NonCalibrated_State,
 	Calibrated_State,
 	DataLogging_State,
-	BLE_AttendRequest_State,
-	Flash_Erasing_State,
 } State_FSM;
 typedef enum _Event_FSM
 {
@@ -55,13 +53,10 @@ typedef enum _Event_FSM
 	Minus100_to_Plus100_Event,
 	Plus100_to_Minus100_Event,
 	Nothing_Event,
-	BLE_Set_UsrData_Event,
-	BLE_Get_UsrData_Event,
-	BLE_Get_SensorData_Event,
-	BLE_EraseMemory,
-	UserButtonShortPress_Event, //only for debugging
-	UserButtonLongPress_Event, //only for debugging
-	UserButtonVeryLongPress_Event, //only for debugging
+	BLT_Set_UsrData_Event,
+	BLT_Get_UsrData_Event,
+	BLT_Get_SensorData_Event,
+	BLT_EraseMemory,
 } Event_FSM;
 typedef enum _SwitchPosition //switch position RC transceiver
 {
@@ -288,10 +283,10 @@ int main(void)
 			  //Change FSM state
 			  state_FSM = Calibrated_State;
 			  break;
-		  case BLE_Set_UsrData_Event: //Set device information request from PC app
+		  case BLT_Set_UsrData_Event: //Set device information request from PC app
 
 			  break;
-		  case BLE_Get_UsrData_Event: //Get device information request from PC app
+		  case BLT_Get_UsrData_Event: //Get device information request from PC app
 			  HAL_UART_AbortReceive_IT(&huart1);
 			  HC06_Tx_UsrData[0] = W25Q64V_Dev.isErased; //1 = is erased
 			  memcpy(&HC06_Tx_UsrData[1],&W25Q64V_Dev.written4KSectorCount,2); //max 4kSectorCount = 2048 (only 2 bytes required)
@@ -300,7 +295,7 @@ int main(void)
 			  HAL_UART_Transmit(&huart1, HC06_Tx_UsrData, 57, 100);
 			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 			  break;
-		  case BLE_Get_SensorData_Event: //Get sensor data request from PC app
+		  case BLT_Get_SensorData_Event: //Get sensor data request from PC app
 			  HAL_UART_AbortReceive_IT(&huart1);
 			  uint32_t i = 0;
 			  //uint32_t j = 0;
@@ -320,7 +315,7 @@ int main(void)
 			  }
 			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 			  break;
-		  case BLE_EraseMemory:
+		  case BLT_EraseMemory:
 			  W25qxx_EraseChip(&W25Q64V_Dev);
 			  W25qxx_IsErased(&W25Q64V_Dev);
 			  nSamples = 0;
@@ -402,9 +397,6 @@ int main(void)
 		  default:
 			  break;
 		  }
-		  break;
-	  case BLE_AttendRequest_State:
-		  //When computer is connected or disconnected sends a message to change HC08 connection status
 		  break;
 	  default:
 		  break;
@@ -975,19 +967,19 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			switch((char)HC06_Rx_CmdBuffer[5])
 			{
 			case '0': //Get device info
-				eventTemp = BLE_Get_UsrData_Event;
+				eventTemp = BLT_Get_UsrData_Event;
 				break;
 			case '1': //Set device info
-				eventTemp = BLE_Set_UsrData_Event;
+				eventTemp = BLT_Set_UsrData_Event;
 				break;
 			case '2': //Calib sensors
 				//eventTemp = Nothing_Event;
 				break;
 			case '3': //Erase memory
-				eventTemp = BLE_EraseMemory;
+				eventTemp = BLT_EraseMemory;
 				break;
 			case '4': //Read memory
-				eventTemp = BLE_Get_SensorData_Event;
+				eventTemp = BLT_Get_SensorData_Event;
 				break;
 			default:
 				break;
