@@ -90,8 +90,8 @@ void UART_IdleLineCallback(UART_HandleTypeDef *huart);
 #define HC06_USART1_TX_GPIO_Port GPIOA
 #define HC06_USART1_RX_Pin GPIO_PIN_10
 #define HC06_USART1_RX_GPIO_Port GPIOA
-#define Test_Pin GPIO_PIN_12
-#define Test_GPIO_Port GPIOA
+#define Test_IMU_Pin GPIO_PIN_12
+#define Test_IMU_GPIO_Port GPIOA
 #define HC06_PWR_CTRL_Pin GPIO_PIN_15
 #define HC06_PWR_CTRL_GPIO_Port GPIOA
 #define ICM20948_SPI3_MISO_Pin GPIO_PIN_4
@@ -100,6 +100,12 @@ void UART_IdleLineCallback(UART_HandleTypeDef *huart);
 #define ICM20948_SPI3_MOSI_GPIO_Port GPIOB
 #define RC_PWM_TIM4_CH1_Pin GPIO_PIN_6
 #define RC_PWM_TIM4_CH1_GPIO_Port GPIOB
+#define Test_Baro_Pin GPIO_PIN_7
+#define Test_Baro_GPIO_Port GPIOB
+#define Test_GPS_Pin GPIO_PIN_8
+#define Test_GPS_GPIO_Port GPIOB
+#define Test_Flash_Pin GPIO_PIN_9
+#define Test_Flash_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

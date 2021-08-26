@@ -234,10 +234,15 @@ int main(void)
 
   //Initialize HC06
   HC06_Init_Device(&HC06_Dev, &huart1, HC06_PWR_CTRL_GPIO_Port, HC06_PWR_CTRL_Pin);
-
-  HC06_PowerON(&HC06_Dev);
+  //HC06_PowerON(&HC06_Dev);
   //HAL_Delay(500);
   //HC06_ConfigBaudRate(&HC06_Dev, BR_115200);
+
+  //Debug wires
+  HAL_GPIO_WritePin(Test_GPS_GPIO_Port, Test_GPS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(Test_IMU_GPIO_Port, Test_IMU_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(Test_Baro_GPIO_Port, Test_Baro_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(Test_Flash_GPIO_Port, Test_Flash_Pin, GPIO_PIN_RESET);
 
   /* USER CODE END 2 */
 
@@ -305,9 +310,7 @@ int main(void)
 			  //uint32_t j = 0;
 			  for (i=0; i<W25Q64V_Dev.written4KSectorCount; i++)
 			  {
-				  HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_RESET);
 				  W25qxx_ReadSector(&W25Q64V_Dev, &HC06_Tx_SensorData[0], i, 0, 4096);
-				  HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_SET);
 				  HAL_UART_Transmit(&huart1, &HC06_Tx_SensorData[0], 4096, 1000);
 				  HAL_Delay(220);
 //				  for (j=0; j<8; j++) //the 4096 byte sector is transferred in 8 packets of 512 bytes
@@ -836,10 +839,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED_Pin|ICM20948_SPI3_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin|Test_Baro_Pin
+                          |Test_GPS_Pin|Test_Flash_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Test_Pin|HC06_PWR_CTRL_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Test_IMU_Pin|HC06_PWR_CTRL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : LED_Pin ICM20948_SPI3_CS_Pin */
   GPIO_InitStruct.Pin = LED_Pin|ICM20948_SPI3_CS_Pin;
@@ -848,15 +852,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : W25Q64_SPI1_CS_Pin MS5611_SPI2_CS_Pin Buzzer_PWR_CTRL_Pin */
-  GPIO_InitStruct.Pin = W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin;
+  /*Configure GPIO pins : W25Q64_SPI1_CS_Pin MS5611_SPI2_CS_Pin Buzzer_PWR_CTRL_Pin Test_Baro_Pin
+                           Test_GPS_Pin Test_Flash_Pin */
+  GPIO_InitStruct.Pin = W25Q64_SPI1_CS_Pin|MS5611_SPI2_CS_Pin|Buzzer_PWR_CTRL_Pin|Test_Baro_Pin
+                          |Test_GPS_Pin|Test_Flash_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Test_Pin HC06_PWR_CTRL_Pin */
-  GPIO_InitStruct.Pin = Test_Pin|HC06_PWR_CTRL_Pin;
+  /*Configure GPIO pins : Test_IMU_Pin HC06_PWR_CTRL_Pin */
+  GPIO_InitStruct.Pin = Test_IMU_Pin|HC06_PWR_CTRL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -905,8 +911,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		//HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_RESET);
 		//Read IMU
+		HAL_GPIO_WritePin(Test_IMU_GPIO_Port, Test_IMU_Pin, GPIO_PIN_SET);
 		ICM20948_Get_AGMT_RawData(&ICM20948_Dev);
+		HAL_GPIO_WritePin(Test_IMU_GPIO_Port, Test_IMU_Pin, GPIO_PIN_RESET);
 		//Start conversion or read conversion result barometer
+		HAL_GPIO_WritePin(Test_Baro_GPIO_Port, Test_Baro_Pin, GPIO_PIN_SET);
 		if (MS5611_Dev.current_ADC_Var == Pressure)
 		{
 			MS5611_Read_ADC(&MS5611_Dev);
@@ -918,6 +927,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			MS5611_Read_ADC(&MS5611_Dev);
 			MS5611_Init_ADC_Conv(&MS5611_Dev, Pressure);
 		}
+		HAL_GPIO_WritePin(Test_Baro_GPIO_Port, Test_Baro_Pin, GPIO_PIN_RESET);
 		//Fill data buffer and write external flash
 		float2uint8(MS5611_Dev.deltaH, &dataBuffer[0], 1);
 		float2uint8(ICM20948_Dev.sensorsDataProc.accelData.x, &dataBuffer[4], 1);
@@ -930,7 +940,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		float2uint8(ICM20948_Dev.sensorsDataProc.magnetoData.y, &dataBuffer[32], 1);
 		float2uint8(ICM20948_Dev.sensorsDataProc.magnetoData.z, &dataBuffer[36], 1);
 		memcpy(&dataBuffer[40],UBLOXM8N_Dev.navData,92);
+		HAL_GPIO_WritePin(Test_Flash_GPIO_Port, Test_Flash_Pin, GPIO_PIN_SET);
 		W25Q64_WriteBytes(&W25Q64V_Dev, &dataBuffer[0], 132);
+		HAL_GPIO_WritePin(Test_Flash_GPIO_Port, Test_Flash_Pin, GPIO_PIN_RESET);
 		//Increment samples counter
 		nSamples++;
 		//HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_SET);
