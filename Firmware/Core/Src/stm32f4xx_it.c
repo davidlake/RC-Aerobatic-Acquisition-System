@@ -63,7 +63,7 @@ extern TIM_HandleTypeDef htim11;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
-extern uint8_t cntIdle;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
