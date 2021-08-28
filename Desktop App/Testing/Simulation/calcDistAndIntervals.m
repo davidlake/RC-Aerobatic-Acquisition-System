@@ -1,4 +1,4 @@
-function [totalDist,timeIntervals] = calcDistAndIntervals(waypoints,meanSpeed)
+function [totalDist,TimeOfArrival] = calcDistAndIntervals(waypoints,meanSpeed)
 % waypoints: Nx3 matrix [m]
 % meanSpeed: single value [km/h]
 % totalDist: [m]
@@ -12,5 +12,6 @@ function [totalDist,timeIntervals] = calcDistAndIntervals(waypoints,meanSpeed)
     totalDist = sum(distIntervals);
     meanSpeedN = meanSpeed*1000/3600;
     timeIntervals = distIntervals/meanSpeedN;
+    TimeOfArrival = [0; cumsum(timeIntervals)];
 end
 
