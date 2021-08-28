@@ -8,8 +8,8 @@ configureCallback(device,"byte",512,@getBluetoothData)
 % device.NumBytesAvailable
 read(device,device.NumBytesAvailable);
 
-write(device,[0,1,2,3])
-write(device,'HC06-0')
+% write(device,[0,1,2,3])
+% write(device,'HC06-0')
 
 device.NumBytesWritten
 % flush(device)
