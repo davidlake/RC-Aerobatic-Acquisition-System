@@ -7,8 +7,8 @@ function drawFlightTrack(ax)
     plot3(ax,[0,260],[0,150],[0,0],"Color",'w'); %right floor line
     plot3(ax,[0,0],[0,150],[0,0],"Color",'w'); %mid line
     plot3(ax,[-260,260],[-7,-7],[0,0],'LineStyle',"--","Color",[0.7176,0.2745,1]); %judges line
-    plot3(ax,[-260,-260,260,260,-260],[150,150,150,150,150],[0,-270,-270,0,0],'LineStyle',"--","Color",'r'); %window
-    plot3(ax,[0,0],[150,150],[0,-270],'LineStyle',"--","Color",'r'); %mid line
+    plot3(ax,[-260,-260,260,260,-260],[150,150,150,150,150],[0,-270,-270,0,0],'LineStyle',"--","Color",'b'); %window
+    plot3(ax,[0,0],[150,150],[0,-270],'LineStyle',"--","Color",'b'); %mid line
     plot3(ax,0,0,0,'Marker',"o",'MarkerEdgeColor','k',"MarkerFaceColor",'k'); %pilot point
     hold(ax,'off');
     ax.DataAspectRatio = [1 1 1];
