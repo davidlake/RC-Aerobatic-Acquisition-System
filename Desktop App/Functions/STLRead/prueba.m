@@ -10,16 +10,21 @@ fv = stlread('.\AircraftModels\Gemini.stl');
 
 ax = uiaxes;
 
-p = patch(ax,fv,'FaceColor',       [0.8 0.8 1.0], ...
+p = patch(ax,fv,'Facecolor',[0    0.5451    0.8196], ...
          'EdgeColor',       'none',        ...
          'FaceLighting',    'gouraud',     ...
-         'AmbientStrength', 0.15);
+         'AmbientStrength', 0.22);
+
+
 xlabel(ax,'X');
 ylabel(ax,'Y');
 zlabel(ax,'Z');
 ax.DataAspectRatio = [1 1 1];
 
-ax.Children(1).Vertices = rotatepoint(randrot,fv.vertices);
+% ax.Children(1).Vertices = rotatepoint(randrot,fv.vertices);
+
+camlight(ax,'headlight');
+material(ax.Children(1),'shiny');
 
 % % % Add a camera light, and tone down the specular highlighting
 % camlight(ax,'headlight');
