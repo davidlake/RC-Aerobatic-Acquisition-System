@@ -26,6 +26,8 @@ ax.DataAspectRatio = [1 1 1];
 camlight(ax,'headlight');
 material(ax.Children(1),'shiny');
 
+view(ax,[30,20])
+
 % % % Add a camera light, and tone down the specular highlighting
 % camlight(ax,'headlight');
 % material(p,'dull');
