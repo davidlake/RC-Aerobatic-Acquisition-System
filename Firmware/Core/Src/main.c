@@ -254,6 +254,8 @@ int main(void)
 	  switch (state_FSM)
 	  {
 	  case Initialize_State:
+		  //Disable GPS IT uart
+		  __HAL_UART_DISABLE_IT(&huart2, UART_IT_IDLE);
 		  //Read device info stored in external flash and store it in MCU RAM: name and nSamples
 		  getDeviceInfo();
 		  //Initialization buzzer sound 2beeps + long beep
@@ -307,18 +309,11 @@ int main(void)
 			  break;
 		  case BLT_Get_SensorData_Event:; //Get sensor data request from PC app
 			  uint32_t i = 0;
-			  //uint32_t j = 0;
 			  for (i=0; i<W25Q64V_Dev.written4KSectorCount; i++)
 			  {
 				  W25qxx_ReadSector(&W25Q64V_Dev, &HC06_Tx_SensorData[0], i, 0, 4096);
 				  HAL_UART_Transmit(&huart1, &HC06_Tx_SensorData[0], 4096, 1000);
-				  HAL_Delay(220);
-//				  for (j=0; j<8; j++) //the 4096 byte sector is transferred in 8 packets of 512 bytes
-//				  {
-//					  HAL_UART_Transmit(&huart1, &HC06_Tx_SensorData[j*512], 512, 1000);
-//					  HAL_Delay(20);
-//				  }
-//				  HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_SET);
+				  HAL_Delay(120);
 			  }
 			  HAL_UART_Receive_IT(&huart1, &HC06_Rx_CmdBuffer[0], 6);
 			  break;
@@ -770,7 +765,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 921600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -909,13 +904,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim == &htim11) //acquisition trigger
 	{
-		//HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_RESET);
 		//Read IMU
-		HAL_GPIO_WritePin(Test_IMU_GPIO_Port, Test_IMU_Pin, GPIO_PIN_SET);
 		ICM20948_Get_AGMT_RawData(&ICM20948_Dev);
-		HAL_GPIO_WritePin(Test_IMU_GPIO_Port, Test_IMU_Pin, GPIO_PIN_RESET);
 		//Start conversion or read conversion result barometer
-		HAL_GPIO_WritePin(Test_Baro_GPIO_Port, Test_Baro_Pin, GPIO_PIN_SET);
 		if (MS5611_Dev.current_ADC_Var == Pressure)
 		{
 			MS5611_Read_ADC(&MS5611_Dev);
@@ -927,7 +918,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			MS5611_Read_ADC(&MS5611_Dev);
 			MS5611_Init_ADC_Conv(&MS5611_Dev, Pressure);
 		}
-		HAL_GPIO_WritePin(Test_Baro_GPIO_Port, Test_Baro_Pin, GPIO_PIN_RESET);
 		//Fill data buffer and write external flash
 		float2uint8(MS5611_Dev.deltaH, &dataBuffer[0], 1);
 		float2uint8(ICM20948_Dev.sensorsDataProc.accelData.x, &dataBuffer[4], 1);
@@ -940,12 +930,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		float2uint8(ICM20948_Dev.sensorsDataProc.magnetoData.y, &dataBuffer[32], 1);
 		float2uint8(ICM20948_Dev.sensorsDataProc.magnetoData.z, &dataBuffer[36], 1);
 		memcpy(&dataBuffer[40],UBLOXM8N_Dev.navData,92);
-		HAL_GPIO_WritePin(Test_Flash_GPIO_Port, Test_Flash_Pin, GPIO_PIN_SET);
 		W25Q64_WriteBytes(&W25Q64V_Dev, &dataBuffer[0], 132);
-		HAL_GPIO_WritePin(Test_Flash_GPIO_Port, Test_Flash_Pin, GPIO_PIN_RESET);
 		//Increment samples counter
 		nSamples++;
-		//HAL_GPIO_WritePin(Test_GPIO_Port, Test_Pin, GPIO_PIN_SET);
 	}
 	if (htim == &htim9) //status led
 	{
