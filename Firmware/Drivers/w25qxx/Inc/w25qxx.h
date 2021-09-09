@@ -50,23 +50,23 @@ typedef enum _W25QXX_ID_t
 }W25QXX_ID_t;
 typedef struct _W25Qxx_DEVICE
 {
-	W25QXX_ID_t	ID;
-	uint8_t		UniqID[8];
-	uint16_t	PageSize;
-	uint32_t	PageCount;
-	uint32_t	SectorSize;
-	uint32_t	SectorCount;
-	uint32_t	BlockSize;
-	uint32_t	BlockCount;
-	uint32_t	CapacityInKiloByte;
+	W25QXX_ID_t	ID; //manufacturer id
+	uint8_t		UniqID[8]; //memory type
+	uint16_t	PageSize; //page size for this memory
+	uint32_t	PageCount; //number of pages on this memory
+	uint32_t	SectorSize; //size of one sector of this memory
+	uint32_t	SectorCount; //number of available sectors
+	uint32_t	BlockSize; //size of one block of this memory
+	uint32_t	BlockCount; //number of available blocks
+	uint32_t	CapacityInKiloByte; //total capacity calculation
 	uint8_t		StatusRegister1;
 	uint8_t		StatusRegister2;
 	uint8_t		StatusRegister3;	
-	uint8_t		Lock;
-	W25Qxx_HAL_SERIF serif;
-	uint32_t	currentMemoryAddress;
-	bool 		isErased;
-	uint32_t 	written4KSectorCount;
+	uint8_t		Lock; //locks the memory access while erasing or writing the memory
+	W25Qxx_HAL_SERIF serif; //serial interface handle
+	uint32_t	currentMemoryAddress; //variable that stores current address
+	bool 		isErased; //if 0 the memory has some data written, if 1 the memory is empty
+	uint32_t 	written4KSectorCount; //number of sectors written
 }W25Qxx_DEVICE;
 
 //############################################################################
